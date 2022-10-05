@@ -76,6 +76,7 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
       const maxAge = k === 'key' ? `; Max-Age=${1000 * 60 * 60 * 20}` : ''
       document.cookie = `${k.toLowerCase()}=${formInput[k]}; SameSite; Secure${maxAge}`
     })
+    document.cookie = `puuid=${puuid}; SameSite; Secure; Max-Age=${1000 * 60 * 60 * 20}`
     onSubmit()
   }
 
