@@ -1,7 +1,12 @@
-import React from 'react'
+import { Stack, Autocomplete, TextField, Button } from '@mui/material'
 
-export default function Form() {
+export default function Form({ champions }) {
   return (
-    <div>Form</div>
+    <Stack>
+      <Autocomplete
+        options={champions}
+        renderInput={(params) => <TextField {...params} label="Champions" />}
+      />
+    </Stack>
   )
 }
