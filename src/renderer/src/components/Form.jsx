@@ -3,6 +3,7 @@ import { useState, useReducer } from 'react'
 import { useQuery } from 'react-query'
 import Cookies from 'js-cookie'
 
+// eslint-disable-next-line react/prop-types
 export default function Form({ onSubmit = () => console.log('Submitted') }) {
   // TODO: Add modal with instructions for obtaining an API key
   const { isLoading, error, data } = useQuery(['champData'], () =>
@@ -10,6 +11,17 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
       'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json'
     ).then((res) => res.json())
   )
+
+  const [formInput, setFormInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
+    key: Cookies.get('key'),
+    summoner: Cookies.get('summoner'),
+    region: Cookies.get('region'),
+    champion: '',
+    role: ''
+  })
+
+  const [formError, setFormError] = useState(false)
+  const [formLoading, setFormLoading] = useState(false)
 
   if (isLoading) return <CircularProgress />
 
@@ -23,22 +35,12 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
       </div>
     )
 
-  const [formInput, setFormInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
-    key: Cookies.get('key'),
-    summoner: Cookies.get('summoner'),
-    region: Cookies.get('region'),
-    champion: '',
-    role: ''
-  })
-
   const defaultValues = {
     key: Cookies.get('key') || '',
     summoner: Cookies.get('summoner') || '',
     region: Cookies.get('region') || null
   }
 
-  const [formError, setFormError] = useState(false)
-  const [formLoading, setFormLoading] = useState(false)
   const errorText = 'Request failed, make sure your API key and summoner details are correct'
 
   const handleInput = (e, val) => {
