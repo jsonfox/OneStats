@@ -4,12 +4,17 @@ import { useLoaderData, Await } from 'react-router-dom'
 import { Stack, Button, LinearProgress } from '@mui/material'
 
 export default function Data() {
-  const data = useLoaderData()
+  const { key, region, matchIds } = useLoaderData()
+  const fetcher = new Promise((res) => {
+    setTimeout(() => {
+      res(matchIds)
+    }, 3000)
+  })
 
   return (
     <Suspense fallback={<Loading />}>
       <Await
-        resolve={data}
+        resolve={fetcher}
         errorElement={
           <div className="error">
             <h2>Could not load champion data</h2>

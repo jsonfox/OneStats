@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Typography, Box } from '@mui/material'
-import { fetchMatchIds, fetchMatch } from './utils/fetchers'
+import { fetchMatchIds } from './utils/fetchers'
 import { Form, Data } from './routes'
 import { Versions } from './components'
 
@@ -27,33 +27,18 @@ const router = createBrowserRouter([
   {
     element: <Data />,
     path: 'data',
-    loader: async () => {
+    loader: () => {
       const userData = db() || {
         matches: [],
         latest: null
       }
-      const { matches, latest } = userData
-      const creds = {
-        key: Cookies.get('key'),
-        region: Cookies.get('region')
-      }
-      const matchIds = await fetchMatchIds({
-        ...creds,
+      const [key, region] = [Cookies.get('key'), Cookies.get('region')]
+      return fetchMatchIds({
+        key,
+        region,
         puuid: Cookies.get('puuid'),
-        latest
+        latest: userData.latest
       })
-      userData.latest = Date.now()
-      matchIds.reverse()
-      for (let i = 0; i < matchIds.length; i += 20) {
-        if (i % 100 === 0) await new Promise(r => setTimeout(r, 120000));
-        const currMatches = matchIds
-          .slice(i, i + 20)
-          .map((matchId) => fetchMatch({ ...creds, matchId }))
-        const resolved = await Promise.all(currMatches)
-        resolved.forEach((m) => matches.push(m))
-      }
-      console.log(matches)
-      return matches
     }
   }
 ])

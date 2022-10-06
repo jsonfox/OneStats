@@ -1,23 +1,24 @@
 import axios from 'axios'
 
-const getBaseUrl = (region) => {
-  const apiRegion = ['na1', 'la1', 'la2', 'br1'].includes(region)
-  ? 'americas'
-  : ['eun1', 'euw1', 'tr1', 'ru'].includes(region)
-  ? 'europe'
-  : ['kr', 'jp1'].includes(region)
-  ? 'asia'
-  : 'sea'
-  return `https://${apiRegion}.api.riotgames.com/lol/match/v5/matches/`
-}
+const getRegion = (code) =>
+  ['na1', 'la1', 'la2', 'br1'].includes(code)
+    ? 'americas'
+    : ['eun1', 'euw1', 'tr1', 'ru'].includes(code)
+    ? 'europe'
+    : ['kr', 'jp1'].includes()
+    ? 'asia'
+    : 'sea'
 
 export async function fetchMatchIds({ key, puuid, region, latest }) {
+  const regionRoute = getRegion(region)
   const apiUrl = (index) => {
-    const baseUrl = getBaseUrl(region)
     const queryParam = `?${
       latest ? `startTime=${latest}` : ''
     }${`type=ranked&start=${index}&count=100&`}api_key=${key}`
-    return baseUrl + `by-puuid/${puuid}/ids` + queryParam
+    return (
+      `https://${regionRoute}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids` +
+      queryParam
+    )
   }
   const ids = []
   let index = 0
@@ -30,10 +31,5 @@ export async function fetchMatchIds({ key, puuid, region, latest }) {
     index += 100
   }
   if (ids.length < 1) return new Error()
-  return ids
-}
-
-export async function fetchMatch({ key, matchId, region }) {
-  const url = getBaseUrl(region) + matchId + '?api_key=' + key
-  return axios.get(url, { mode: 'no-cors' }).then((res) => res.data)
+  return { key, region: regionRoute, matchIds: ids }
 }
