@@ -2,15 +2,14 @@
 import { Suspense } from 'react'
 import { useLoaderData, Await } from 'react-router-dom'
 import { Stack, Button, LinearProgress } from '@mui/material'
-import fetchMatches from '../parser'
 
 export default function Data() {
   const data = useLoaderData()
-  const wait = new Promise((resolve) => setTimeout(() => resolve(5), 5000))
+
   return (
     <Suspense fallback={<Loading />}>
       <Await
-        resolve={wait}
+        resolve={data}
         errorElement={
           <div className="error">
             <h2>Could not load champion data</h2>
