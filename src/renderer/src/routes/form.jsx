@@ -2,9 +2,9 @@ import { Stack, Autocomplete, TextField, Button, CircularProgress } from '@mui/m
 import { useState, useReducer } from 'react'
 import { useQuery } from 'react-query'
 import Cookies from 'js-cookie'
+import { Navigate } from 'react-router-dom'
 
-// eslint-disable-next-line react/prop-types
-export default function Form({ onSubmit = () => console.log('Submitted') }) {
+export default function Form() {
   // TODO: Add modal with instructions for obtaining an API key
   const { isLoading, error, data } = useQuery(['champData'], () =>
     fetch(
@@ -22,6 +22,7 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
 
   const [formError, setFormError] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   if (isLoading) return <CircularProgress />
 
@@ -72,12 +73,17 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
     const puuid = await validateCredentials()
     setFormLoading(false)
     if (!puuid) return
+    const cookieOptions = { sameSite: 'lax', secure: true }
     Object.keys(formInput).forEach((k) => {
-      const maxAge = k === 'key' ? `; Max-Age=${1000 * 60 * 60 * 20}` : ''
-      document.cookie = `${k.toLowerCase()}=${formInput[k]}; SameSite; Secure${maxAge}`
+      if (k === 'key') {
+        if (Cookies.get('key') !== formInput.key)
+          Cookies.set('key', formInput.key, { expires: 0.8, ...cookieOptions })
+      } else {
+        Cookies.set(k.toLowerCase(), formInput[k], cookieOptions)
+      }
     })
-    document.cookie = `puuid=${puuid}; SameSite; Secure; Max-Age=${1000 * 60 * 60 * 20}`
-    onSubmit()
+    Cookies.set('puuid', puuid)
+    setSubmitted(true)
   }
 
   const champions = data.slice(1).map(({ id, name }) => ({ label: name, id }))
@@ -89,7 +95,9 @@ export default function Form({ onSubmit = () => console.log('Submitted') }) {
 
   const validOption = (option, value) => option === value || option.id === value.id || value === ''
 
-  return (
+  return submitted ? (
+    <Navigate to="/data" replace={true} />
+  ) : (
     <form onSubmit={handleSubmit}>
       <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
         <TextField
