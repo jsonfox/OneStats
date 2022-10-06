@@ -1,27 +1,32 @@
-import { useQuery } from 'react-query'
-import { Stack, LinearProgress } from '@mui/material'
-import Cookies from 'js-cookie'
+/* eslint-disable react/no-children-prop */
+import { Suspense } from 'react'
+import { useLoaderData, Await } from 'react-router-dom'
+import { Stack, Button, LinearProgress } from '@mui/material'
 import fetchMatches from '../parser'
 
-// eslint-disable-next-line react/prop-types
-export default function Data({ onReset = () => null }) {
-  const { data, error, isLoading, isRefetching, refetch } = useQuery(
-    'data',
-    async () => {
-      if (data && !inProgress()) return
-      const creds = {
-        key: Cookies.get('key'),
-        puuid: Cookies.get('puuid'),
-        region: Cookies.get('region')
-      }
-      return await fetchMatches(creds)
-    },
-    { retry: false }
+export default function Data() {
+  const data = useLoaderData()
+  const wait = new Promise((resolve) => setTimeout(() => resolve(5), 5000))
+  return (
+    <Suspense fallback={<Loading />}>
+      <Await
+        resolve={wait}
+        errorElement={
+          <div className="error">
+            <h2>Could not load champion data</h2>
+            <Button variant="contained" onClick={() => window.location.reload(true)}>
+              Reload
+            </Button>
+          </div>
+        }
+        children={(resolved) => <DataDisplay data={resolved} />}
+      />
+    </Suspense>
   )
+}
 
-  const inProgress = () => !!(isLoading || isRefetching)
-
-  return inProgress() ? (
+function Loading() {
+  return (
     <Stack
       spacing={2}
       sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
@@ -29,15 +34,10 @@ export default function Data({ onReset = () => null }) {
       <p>Analyzing your match history...</p>
       <LinearProgress sx={{ width: '60%' }} />
     </Stack>
-  ) : data && !error ? (
-    <div>
-      <button onClick={onReset}>Reset</button>
-      <p>{data.length}</p>
-    </div>
-  ) : (
-    <div>
-      <button onClick={onReset}>Reset</button>
-      <button onClick={refetch}>Retry</button>
-    </div>
   )
+}
+
+// eslint-disable-next-line react/prop-types
+function DataDisplay({ data }) {
+  return <div>{data}</div>
 }
