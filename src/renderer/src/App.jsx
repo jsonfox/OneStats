@@ -5,13 +5,6 @@ import { getMatchIds, getMatch } from './utils/fetchers'
 import { Form, Data } from './routes'
 import { Versions } from './components'
 
-const db = (data) => {
-  const puuid = Cookies.get('puuid')
-  if (data) return localStorage.setItem(puuid, data)
-  data = localStorage.getItem(puuid)
-  return data ? JSON.parse(data) : null
-}
-
 const router = createBrowserRouter([
   {
     element: <Form />,
@@ -28,7 +21,9 @@ const router = createBrowserRouter([
     element: <Data />,
     path: 'data',
     loader: async () => {
-      const userData = db() || {
+      const puuid = Cookies.get('puuid')
+      const localData = localStorage.getItem(puuid) ? JSON.parse(localStorage.getItem(puuid)) : null
+      const userData = localData || {
         matches: [],
         latest: null
       }
@@ -43,14 +38,13 @@ const router = createBrowserRouter([
       return async function fetchAllMatches() {
         const matches = []
         for (const [i, id] of matchIds.entries()) {
-          console.log(`Fetching match ${i} of ${matchIds.length}`)
+          console.log(`Fetching match ${i + 1} of ${matchIds.length}`)
           let retry = true
           let retryCount = 0
           while (retry && retryCount < 5) {
             try {
               if (retryCount > 0) console.log('Retrying match', i)
               const res = await getMatch({ key, region, id })
-              console.log(res.status)
               if (res.status !== 200) throw new Error()
               matches.push(res.data.info)
               retry = false
@@ -65,6 +59,15 @@ const router = createBrowserRouter([
               )
             }
           }
+        }
+        console.log('Fetching complete')
+        try {
+          const latestMatch = matches.at(-1)?.gameEndTimestamp
+          if (latestMatch) userData.latest = latestMatch
+          userData.matches = userData.matches.concat(matches)
+          localStorage.setItem(puuid, JSON.stringify(userData))
+        } catch (err) {
+          console.error(err)
         }
         return matches
       }

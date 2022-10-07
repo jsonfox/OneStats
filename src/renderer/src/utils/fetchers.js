@@ -13,7 +13,7 @@ export async function getMatchIds({ key, puuid, region, latest }) {
   const regionRoute = getRegion(region)
   const apiUrl = (index) => {
     const queryParam = `?${
-      latest ? `startTime=${latest}` : ''
+      latest ? `startTime=${latest}&` : ''
     }${`type=ranked&start=${index}&count=100&`}api_key=${key}`
     return (
       `https://${regionRoute}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids` +
@@ -30,7 +30,7 @@ export async function getMatchIds({ key, puuid, region, latest }) {
     ids.splice(-1, 0, ...matchIds)
     index += 100
   }
-  if (ids.length < 1) return new Error()
+  ids.reverse()
   return ids
 }
 
