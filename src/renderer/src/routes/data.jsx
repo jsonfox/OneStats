@@ -4,17 +4,22 @@ import { useLoaderData, Await } from 'react-router-dom'
 import { Stack, Button, LinearProgress } from '@mui/material'
 
 export default function Data() {
-  const { key, region, matchIds } = useLoaderData()
-  const fetcher = new Promise((res) => {
-    setTimeout(() => {
-      res(matchIds)
-    }, 3000)
-  })
-
+  const data = useLoaderData()
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense
+      fallback={
+        <Stack
+          spacing={2}
+          sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
+        >
+          <p>Analyzing your match history...</p>
+          <p>This may take a long time depending on how many matches there are</p>
+          <LinearProgress sx={{ width: '60%' }} />
+        </Stack>
+      }
+    >
       <Await
-        resolve={fetcher}
+        resolve={data()}
         errorElement={
           <div className="error">
             <h2>Could not load champion data</h2>
@@ -29,19 +34,8 @@ export default function Data() {
   )
 }
 
-function Loading() {
-  return (
-    <Stack
-      spacing={2}
-      sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
-    >
-      <p>Analyzing your match history...</p>
-      <LinearProgress sx={{ width: '60%' }} />
-    </Stack>
-  )
-}
-
 // eslint-disable-next-line react/prop-types
 function DataDisplay({ data }) {
-  return <div>{data}</div>
+  console.log(data)
+  return <div>{'hi'}</div>
 }

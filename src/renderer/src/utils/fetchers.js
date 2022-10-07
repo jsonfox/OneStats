@@ -9,7 +9,7 @@ const getRegion = (code) =>
     ? 'asia'
     : 'sea'
 
-export async function fetchMatchIds({ key, puuid, region, latest }) {
+export async function getMatchIds({ key, puuid, region, latest }) {
   const regionRoute = getRegion(region)
   const apiUrl = (index) => {
     const queryParam = `?${
@@ -31,5 +31,12 @@ export async function fetchMatchIds({ key, puuid, region, latest }) {
     index += 100
   }
   if (ids.length < 1) return new Error()
-  return { key, region: regionRoute, matchIds: ids }
+  return ids
+}
+
+export function getMatch({ key, region, id }) {
+  return axios.get(
+    `https://${getRegion(region)}.api.riotgames.com/lol/match/v5/matches/${id}?api_key=${key}`,
+    { mode: 'no-cors' }
+  )
 }
