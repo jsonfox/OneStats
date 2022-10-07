@@ -35,7 +35,7 @@ const router = createBrowserRouter([
         latest: userData.latest
       })
 
-      return async function fetchAllMatches() {
+      const data = async function fetchAllMatches() {
         const matches = []
         for (const [i, id] of matchIds.entries()) {
           console.log(`Fetching match ${i + 1} of ${matchIds.length}`)
@@ -64,13 +64,19 @@ const router = createBrowserRouter([
         try {
           const latestMatch = matches.at(-1)?.gameEndTimestamp
           if (latestMatch) userData.latest = latestMatch
-          userData.matches = userData.matches.concat(matches)
+          userData.matches = userData.matches
+            .concat(matches)
+            .filter(
+              (value, index, self) =>
+                index === self.findIndex((match) => match.gameId === value.gameId)
+            )
           localStorage.setItem(puuid, JSON.stringify(userData))
         } catch (err) {
           console.error(err)
         }
         return matches
       }
+      return { data, count: matchIds.length }
     }
   }
 ])

@@ -4,7 +4,7 @@ import { useLoaderData, Await } from 'react-router-dom'
 import { Stack, Button, LinearProgress } from '@mui/material'
 
 export default function Data() {
-  const data = useLoaderData()
+  const { count, data } = useLoaderData()
 
   return (
     <Suspense
@@ -13,9 +13,12 @@ export default function Data() {
           spacing={2}
           sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
         >
-          <p>Analyzing your match history...</p>
+          <p>Fetching {count} games from your match history...</p>
           <p>
             This may take a long time (up to 20 minutes) depending on how many matches there are
+            (max 1000)
+            <br />
+            This is because the API key is rate limited to 100 requests per 2 minutes
           </p>
           <LinearProgress sx={{ width: '60%' }} />
         </Stack>

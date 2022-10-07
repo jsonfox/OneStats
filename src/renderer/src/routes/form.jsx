@@ -20,6 +20,8 @@ export default function Form() {
   const [formLoading, setFormLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
+  localStorage.setItem('champions', JSON.stringify(champions))
+
   const defaultValues = {
     key: Cookies.get('key') || '',
     summoner: Cookies.get('summoner') || '',
