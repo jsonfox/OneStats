@@ -2,6 +2,7 @@
 import { Suspense } from 'react'
 import { useLoaderData, Await, Link } from 'react-router-dom'
 import { Stack, Button, LinearProgress } from '@mui/material'
+import Cookies from 'js-cookie'
 
 const homeBtn = <Link to="/">form</Link>
 
@@ -37,17 +38,33 @@ export default function Data() {
             <p>or try resubmitting the {homeBtn}</p>
           </div>
         }
-        children={(resolved) => <DataParse data={resolved} />}
+        children={(resolved) => <DataParse matches={resolved} />}
       />
     </Suspense>
   )
 }
 
 // eslint-disable-next-line react/prop-types
-function DataParse({ data }) {
+function DataParse({ matches }) {
+  const champId = Cookies.get('champion')
+  const roleId = Cookies.get('role')
   const parse = new Promise((res) => {
-    // TODO: add parsing
-    const parsed = 'hi'
+    const statObj = () => ({
+      games: 0,
+      wins: 0,
+      losses: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+      duration: 0,
+      level: 0
+    })
+    const parsed = {
+      total: statObj(),
+      byRune: {},
+      byMythic: {}
+    }
+
     res(parsed)
   })
   return (
@@ -65,4 +82,9 @@ function DataParse({ data }) {
       <Await resolve={parse} children={(resolved) => <DataDisplay data={resolved} />} />
     </Suspense>
   )
+}
+
+// eslint-disable-next-line react/prop-types
+function DataDisplay({ data }) {
+  return <div>Hi</div>
 }

@@ -40,3 +40,28 @@ export function getMatch({ key, region, id }) {
     { mode: 'no-cors' }
   )
 }
+
+export function getAssetData(type, localStorage) {
+  const types = {
+    champions: 'champion-summary',
+    items: 'items',
+    perks: 'perks'
+  }
+  return fetch(
+    `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/${types[type]}.json`
+  ).then((res) =>
+    res.json().then((data) => {
+      if (type === 'champions') data = data.slice(1)
+      const list =
+        type === 'items'
+          ? data.map(({ id, name, description }) => ({
+              label: name,
+              id,
+              mythic: description.includes('mythic')
+            }))
+          : data.map(({ id, name }) => ({ label: name, id }))
+      localStorage.setItem(type, JSON.stringify(list))
+      return list
+    })
+  )
+}

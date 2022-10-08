@@ -4,9 +4,27 @@ import { useState, useReducer, Suspense } from 'react'
 import { Navigate, useLoaderData, Await } from 'react-router-dom'
 import { Stack, Autocomplete, TextField, Button, Skeleton, CircularProgress } from '@mui/material'
 
+const regions = [
+  { label: 'NA', id: 'na1' },
+  { label: 'EUNE', id: 'eun1' },
+  { label: 'EUW', id: 'euw1' },
+  { label: 'KR', id: 'kr' },
+  { label: 'LAN', id: 'la1' },
+  { label: 'LAS', id: 'la2' },
+  { label: 'BR', id: 'br1' },
+  { label: 'JP', id: 'jp1' },
+  { label: 'OCE', id: 'oc1' },
+  { label: 'RU', id: 'ru' },
+  { label: 'TR', id: 'tr1' }
+]
+const roles = ['Top', 'Jungle', 'Middle', 'Bottom', 'Support'].map((r) => ({
+  label: r,
+  id: r === 'Support' ? 'UTILITY' : r.toUpperCase()
+}))
+
 export default function Form() {
   // TODO: Add link to instructions for obtaining an API key
-  const champions = useLoaderData()
+  const { champions } = useLoaderData()
 
   const [formInput, setFormInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
     key: Cookies.get('key'),
@@ -20,12 +38,10 @@ export default function Form() {
   const [formLoading, setFormLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  localStorage.setItem('champions', JSON.stringify(champions))
-
   const defaultValues = {
     key: Cookies.get('key') || '',
     summoner: Cookies.get('summoner') || '',
-    region: Cookies.get('region') || null
+    region: regions.findIndex(({ id }) => id === Cookies.get('region'))
   }
 
   const errorText = 'Request failed, make sure your API key and summoner details are correct'
@@ -72,12 +88,6 @@ export default function Form() {
     setSubmitted(true)
   }
 
-  const regions = ['na1', 'eun1', 'euw1', 'kr', 'la1', 'la2', 'br1', 'jp1', 'oc1', 'ru', 'tr1']
-  const roles = ['Top', 'Jungle', 'Middle', 'Bottom', 'Support'].map((r) => ({
-    label: r,
-    id: r === 'Support' ? 'UTILITY' : r.toUpperCase()
-  }))
-
   const validOption = (option, value) => option === value || option.id === value.id || value === ''
 
   return submitted ? (
@@ -117,10 +127,9 @@ export default function Form() {
                 />
                 <Autocomplete
                   id="region"
-                  defaultValue={defaultValues['region']}
+                  defaultValue={regions[defaultValues['region']]}
                   onChange={handleInput}
                   options={regions}
-                  getOptionLabel={(o) => o.toUpperCase()}
                   isOptionEqualToValue={validOption}
                   renderInput={(params) => (
                     <TextField

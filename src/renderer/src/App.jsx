@@ -1,7 +1,8 @@
 import Cookies from 'js-cookie'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Typography, Box } from '@mui/material'
-import { getMatchIds, getMatch } from './utils/fetchers'
+import { get as idbGet, set as idbSet } from 'idb-keyval'
+import { getMatchIds, getMatch, getAssetData } from './utils/fetchers'
 import { Form, Data } from './routes'
 import { Versions } from './components'
 
@@ -10,11 +11,11 @@ const router = createBrowserRouter([
     element: <Form />,
     path: '/',
     loader: async () => {
-      return fetch(
-        'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json'
-      ).then((res) =>
-        res.json().then((data) => data.slice(1).map(({ id, name }) => ({ label: name, id })))
-      )
+      return {
+        champions: getAssetData('champions', localStorage),
+        items: getAssetData('items', localStorage),
+        perks: getAssetData('perks', localStorage)
+      }
     }
   },
   {
@@ -22,8 +23,9 @@ const router = createBrowserRouter([
     path: 'data',
     loader: async () => {
       const puuid = Cookies.get('puuid')
-      const localData = localStorage.getItem(puuid) ? JSON.parse(localStorage.getItem(puuid)) : null
-      const userData = localData || {
+      let userData = await idbGet(puuid)
+      userData &&= JSON.parse(userData)
+      userData ??= {
         matches: [],
         latest: null
       }
@@ -70,7 +72,7 @@ const router = createBrowserRouter([
               (value, index, self) =>
                 index === self.findIndex((match) => match.gameId === value.gameId)
             )
-          localStorage.setItem(puuid, JSON.stringify(userData))
+          await idbSet(puuid, JSON.stringify(userData))
         } catch (err) {
           console.error(err)
         }
