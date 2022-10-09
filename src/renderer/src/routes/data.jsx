@@ -1,9 +1,23 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-children-prop */
+import Cookies from 'js-cookie'
+import { saveAs } from 'file-saver'
 import { Suspense } from 'react'
 import { useLoaderData, Await, Link } from 'react-router-dom'
-import { Stack, Button, LinearProgress, Box, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, Typography } from '@mui/material'
-import Cookies from 'js-cookie'
+import {
+  Stack,
+  Button,
+  LinearProgress,
+  Box,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  Typography
+} from '@mui/material'
 
 const homeBtn = <Link to="/">form</Link>
 
@@ -167,11 +181,7 @@ function DataParse({ data }) {
 }
 
 function DataDisplay({ data }) {
-  const createRows = (obj = {}) => (
-    Object.keys(obj).map((key) => (
-      { specifier: key, ...obj[key] }
-    ))
-  )
+  const createRows = (obj = {}) => Object.keys(obj).map((key) => ({ specifier: key, ...obj[key] }))
   const columns = [
     'Specifier',
     'Games',
@@ -192,42 +202,63 @@ function DataDisplay({ data }) {
     ...createRows(data.byMythic),
     ...createRows(data.byPerk)
   ]
-  const centerText = { textAlign: 'center', paddingBottom: 2 }
+  const handleExport = () => {
+    const arrToCSV = (arr) => arr.join(',')
+    const output = [arrToCSV(columns), ...rows.map((row) => arrToCSV(Object.values(row)))].join(
+      '\n'
+    )
+    const blob = new Blob([output], { type: 'text/plain;charset=utf-8' })
+    saveAs(blob, 'data.csv')
+  }
   return (
-    <Box>
-      <Typography variant='h4' sx={centerText}>{data.champion} | {data.role}</Typography>
-      {data.total.games < 1 ?
-        <Typography variant='h6' sx={centerText}>No Games Found</Typography> :
+    <Box sx={{ textAlign: 'center' }}>
+      <Box sx={{ paddingBottom: 2 }}>
+        <Typography variant="h4">
+          {data.champion} | {data.role}
+        </Typography>
+        {data.total.games > 0 && <Button onClick={handleExport}>Export as CSV</Button>}
+      </Box>
+      {data.total.games < 1 ? (
+        <Typography variant="h6">No Games Found</Typography>
+      ) : (
         <TableContainer component={Paper}>
           <Table aria-label="Match Stats">
             <TableHead>
               <TableRow sx={{ background: '#00000011' }}>
-                {columns.map((label, i) => <TableCell key={label} align={i < 1 ? "left" : "center"}>{label}</TableCell>)}
+                {columns.map((label, i) => (
+                  <TableCell key={label} align={i < 1 ? 'left' : 'center'}>
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row, i) => (
-                <TableRow key={row.specifier} sx={{ background: i % 2 === 0 ? '#00000002' : '#00000008'}}>
-              <TableCell component="th" scope="row">
-                {row.specifier}
-              </TableCell>
-              <TableCell align="center">{row.games}</TableCell>
-              <TableCell align="center">{row.wins}</TableCell>
-              <TableCell align="center">{row.losses}</TableCell>
-              <TableCell align="center">{row.winrate}</TableCell>
-              <TableCell align="center">{row.kills}</TableCell>
-              <TableCell align="center">{row.deaths}</TableCell>
-              <TableCell align="center">{row.assists}</TableCell>
-              <TableCell align="center">{row.kda}</TableCell>
-              <TableCell align="center">{row.damage}</TableCell>
-              <TableCell align="center">{row.level}</TableCell>
-              <TableCell align="center">{row.creepScore}</TableCell>
-              <TableCell align="center">{row.turretKills}</TableCell>
-            </TableRow>
+                <TableRow
+                  key={row.specifier}
+                  sx={{ background: i % 2 === 0 ? '#00000002' : '#00000008' }}
+                >
+                  <TableCell component="th" scope="row">
+                    {row.specifier}
+                  </TableCell>
+                  <TableCell align="center">{row.games}</TableCell>
+                  <TableCell align="center">{row.wins}</TableCell>
+                  <TableCell align="center">{row.losses}</TableCell>
+                  <TableCell align="center">{row.winrate}</TableCell>
+                  <TableCell align="center">{row.kills}</TableCell>
+                  <TableCell align="center">{row.deaths}</TableCell>
+                  <TableCell align="center">{row.assists}</TableCell>
+                  <TableCell align="center">{row.kda}</TableCell>
+                  <TableCell align="center">{row.damage}</TableCell>
+                  <TableCell align="center">{row.level}</TableCell>
+                  <TableCell align="center">{row.creepScore}</TableCell>
+                  <TableCell align="center">{row.turretKills}</TableCell>
+                </TableRow>
               ))}
-          </TableBody>
-        </Table>
-        </TableContainer>}
-    </Box >
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
   )
 }
