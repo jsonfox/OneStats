@@ -2,7 +2,16 @@
 import Cookies from 'js-cookie'
 import { useState, useReducer, Suspense } from 'react'
 import { Navigate, useLoaderData, Await } from 'react-router-dom'
-import { Stack, Autocomplete, TextField, Button, Skeleton, CircularProgress } from '@mui/material'
+import {
+  Stack,
+  Autocomplete,
+  TextField,
+  Button,
+  Skeleton,
+  CircularProgress,
+  Typography,
+  Link
+} from '@mui/material'
 
 const regions = [
   { label: 'NA', id: 'na1' },
@@ -98,7 +107,7 @@ export default function Form() {
         resolve={champions}
         errorElement={
           <div className="error">
-            <h2>Could not load champion data</h2>
+            <h2>Could not load asset data</h2>
             <Button variant="contained" onClick={() => window.location.reload(true)}>
               Reload
             </Button>
@@ -107,6 +116,15 @@ export default function Form() {
         children={(resChamps) => (
           <form onSubmit={handleSubmit}>
             <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
+              <Typography textAlign="center">
+                Read about getting a Developer API Key{' '}
+                <Link
+                  href="https://developer.riotgames.com/docs/portal#_getting-started"
+                  target="_blank"
+                >
+                  here
+                </Link>
+              </Typography>
               <TextField
                 label="Developer API Key"
                 id="key"
@@ -146,7 +164,7 @@ export default function Form() {
               <Autocomplete
                 id="champion"
                 onChange={handleInput}
-                options={resChamps}
+                options={resChamps.sort((a, b) => a.label.localeCompare(b.label))}
                 isOptionEqualToValue={validOption}
                 renderInput={(params) => <TextField {...params} label="Champion" required />}
               />

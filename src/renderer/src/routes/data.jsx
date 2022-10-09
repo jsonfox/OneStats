@@ -224,20 +224,16 @@ function DataDisplay({ data }) {
 
   return (
     <Box sx={{ textAlign: 'center' }}>
-      <Box>
+      <Stack direction="row" justifyContent="center" spacing={2} marginBottom={1}>
         <Typography variant="h4">
           {data.champion} | {data.role}
         </Typography>
-        {data.total.games > 0 && (
-          <Button onClick={handleExport} sx={{ marginY: 2 }}>
-            Export as CSV
-          </Button>
-        )}
-      </Box>
+        {data.total.games > 0 && <Button onClick={handleExport}>Export as CSV</Button>}
+      </Stack>
       {data.total.games < 1 ? (
         <Typography variant="h6">No Games Found</Typography>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ maxWidth: 'max-content', marginX: 'auto' }}>
           <Table aria-label="Match Stats">
             <TableHead>
               <TableRow sx={{ background: '#00000011' }}>

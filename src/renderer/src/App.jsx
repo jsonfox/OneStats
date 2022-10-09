@@ -97,7 +97,7 @@ export default function App() {
           One Stats
         </Typography>
       </Box>
-      <Box component="main" className="container" sx={{ paddingY: 5, flexGrow: 1 }}>
+      <Box component="main" className="container" sx={{ paddingY: 2, flexGrow: 1 }}>
         <RouterProvider router={router} />
       </Box>
       <Box component="footer">
