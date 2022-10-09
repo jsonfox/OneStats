@@ -110,6 +110,7 @@ export default function Form() {
               <TextField
                 label="Developer API Key"
                 id="key"
+                type="password"
                 defaultValue={defaultValues['key']}
                 onChange={handleInput}
                 error={formError}

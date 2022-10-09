@@ -81,9 +81,16 @@ function DataParse({ data }) {
       creepScore: 0,
       ...obj
     })
+    const roles = {
+      TOP: 'Top',
+      JUNGLE: 'Jungle',
+      MIDDLE: 'Mid',
+      BOTTOM: 'ADC',
+      UTILITY: 'Support'
+    }
     const parsed = {
       champion: champions.find(({ id }) => id === champId).label,
-      role: roleId === 'UTILITY' ? 'Support' : roleId[0] + roleId.slice(1).toLowerCase(),
+      role: roles[roleId],
       total: statsObj(),
       byPerk: {},
       byMythic: {}
