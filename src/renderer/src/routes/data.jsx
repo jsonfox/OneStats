@@ -2,7 +2,7 @@
 /* eslint-disable react/no-children-prop */
 import { Suspense } from 'react'
 import { useLoaderData, Await, Link } from 'react-router-dom'
-import { Stack, Button, LinearProgress } from '@mui/material'
+import { Stack, Button, LinearProgress, Box, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, Typography } from '@mui/material'
 import Cookies from 'js-cookie'
 
 const homeBtn = <Link to="/">form</Link>
@@ -167,6 +167,67 @@ function DataParse({ data }) {
 }
 
 function DataDisplay({ data }) {
-  console.log(JSON.stringify(data, null, 2))
-  return <div>Hi</div>
+  const createRows = (obj = {}) => (
+    Object.keys(obj).map((key) => (
+      { specifier: key, ...obj[key] }
+    ))
+  )
+  const columns = [
+    'Specifier',
+    'Games',
+    'Wins',
+    'Losses',
+    'Winrate',
+    'Kills',
+    'Deaths',
+    'Assists',
+    'KDA',
+    'Damage',
+    'Level',
+    'CS',
+    'Turret Kills'
+  ]
+  const rows = [
+    { specifier: 'All Games', ...data.total },
+    ...createRows(data.byMythic),
+    ...createRows(data.byPerk)
+  ]
+  const centerText = { textAlign: 'center', paddingBottom: 2 }
+  return (
+    <Box>
+      <Typography variant='h4' sx={centerText}>{data.champion} | {data.role}</Typography>
+      {data.total.games < 1 ?
+        <Typography variant='h6' sx={centerText}>No Games Found</Typography> :
+        <TableContainer component={Paper}>
+          <Table aria-label="Match Stats">
+            <TableHead>
+              <TableRow sx={{ background: '#00000011' }}>
+                {columns.map((label, i) => <TableCell key={label} align={i < 1 ? "left" : "center"}>{label}</TableCell>)}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, i) => (
+                <TableRow key={row.specifier} sx={{ background: i % 2 === 0 ? '#00000002' : '#00000008'}}>
+              <TableCell component="th" scope="row">
+                {row.specifier}
+              </TableCell>
+              <TableCell align="center">{row.games}</TableCell>
+              <TableCell align="center">{row.wins}</TableCell>
+              <TableCell align="center">{row.losses}</TableCell>
+              <TableCell align="center">{row.winrate}</TableCell>
+              <TableCell align="center">{row.kills}</TableCell>
+              <TableCell align="center">{row.deaths}</TableCell>
+              <TableCell align="center">{row.assists}</TableCell>
+              <TableCell align="center">{row.kda}</TableCell>
+              <TableCell align="center">{row.damage}</TableCell>
+              <TableCell align="center">{row.level}</TableCell>
+              <TableCell align="center">{row.creepScore}</TableCell>
+              <TableCell align="center">{row.turretKills}</TableCell>
+            </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        </TableContainer>}
+    </Box >
+  )
 }
