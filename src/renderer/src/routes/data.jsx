@@ -18,6 +18,7 @@ import {
   Paper,
   Typography
 } from '@mui/material'
+import { SectionRows, SectionDivider } from '../components/Table'
 
 const homeBtn = <Link to="/">form</Link>
 
@@ -45,13 +46,13 @@ export default function Data() {
       <Await
         resolve={data()}
         errorElement={
-          <div className="error">
-            <h2>Could not fetch match data</h2>
+          <Stack className="error" sx={{ textAlign: 'center', alignItems: 'center' }}>
+            <h2>Ran into an error while loading match data</h2>
             <Button variant="contained" onClick={() => window.location.reload(true)}>
               Reload
             </Button>
             <p>or try resubmitting the {homeBtn}</p>
-          </div>
+          </Stack>
         }
         children={(resolved) => <DataParse data={resolved} />}
       />
@@ -197,26 +198,34 @@ function DataDisplay({ data }) {
     'CS',
     'Turret Kills'
   ]
-  const rows = [
-    { specifier: 'All Games', ...data.total },
-    ...createRows(data.byMythic),
-    ...createRows(data.byPerk)
-  ]
+  const rows = {
+    all: [{ specifier: 'All Games', ...data.total }],
+    byMythic: createRows(data.byMythic),
+    byPerk: createRows(data.byPerk)
+  }
   const handleExport = () => {
     const arrToCSV = (arr) => arr.join(',')
-    const output = [arrToCSV(columns), ...rows.map((row) => arrToCSV(Object.values(row)))].join(
-      '\n'
-    )
+    const output = [
+      arrToCSV(columns),
+      ...Object.values(rows)
+        .flat()
+        .map((row) => arrToCSV(Object.values(row)))
+    ].join('\n')
     const blob = new Blob([output], { type: 'text/plain;charset=utf-8' })
-    saveAs(blob, 'data.csv')
+    saveAs(blob, 'match-stats.csv')
   }
+
   return (
     <Box sx={{ textAlign: 'center' }}>
-      <Box sx={{ paddingBottom: 2 }}>
+      <Box>
         <Typography variant="h4">
           {data.champion} | {data.role}
         </Typography>
-        {data.total.games > 0 && <Button onClick={handleExport}>Export as CSV</Button>}
+        {data.total.games > 0 && (
+          <Button onClick={handleExport} sx={{ marginY: 2 }}>
+            Export as CSV
+          </Button>
+        )}
       </Box>
       {data.total.games < 1 ? (
         <Typography variant="h6">No Games Found</Typography>
@@ -233,28 +242,11 @@ function DataDisplay({ data }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, i) => (
-                <TableRow
-                  key={row.specifier}
-                  sx={{ background: i % 2 === 0 ? '#00000002' : '#00000008' }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.specifier}
-                  </TableCell>
-                  <TableCell align="center">{row.games}</TableCell>
-                  <TableCell align="center">{row.wins}</TableCell>
-                  <TableCell align="center">{row.losses}</TableCell>
-                  <TableCell align="center">{row.winrate}</TableCell>
-                  <TableCell align="center">{row.kills}</TableCell>
-                  <TableCell align="center">{row.deaths}</TableCell>
-                  <TableCell align="center">{row.assists}</TableCell>
-                  <TableCell align="center">{row.kda}</TableCell>
-                  <TableCell align="center">{row.damage}</TableCell>
-                  <TableCell align="center">{row.level}</TableCell>
-                  <TableCell align="center">{row.creepScore}</TableCell>
-                  <TableCell align="center">{row.turretKills}</TableCell>
-                </TableRow>
-              ))}
+              <SectionRows rows={rows.all} />
+              <SectionDivider label="By Mythic" columns={columns} />
+              <SectionRows rows={rows.byMythic} />
+              <SectionDivider label="By Rune" columns={columns} />
+              <SectionRows rows={rows.byPerk} />
             </TableBody>
           </Table>
         </TableContainer>
