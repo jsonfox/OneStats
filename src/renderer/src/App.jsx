@@ -76,7 +76,7 @@ const router = createBrowserRouter([
         } catch (err) {
           console.error(err)
         }
-        return matches
+        return userData.matches
       }
       return { data, count: matchIds.length }
     }

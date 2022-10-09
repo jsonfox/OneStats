@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/no-children-prop */
 import { Suspense } from 'react'
 import { useLoaderData, Await, Link } from 'react-router-dom'
@@ -38,32 +39,76 @@ export default function Data() {
             <p>or try resubmitting the {homeBtn}</p>
           </div>
         }
-        children={(resolved) => <DataParse matches={resolved} />}
+        children={(resolved) => <DataParse data={resolved} />}
       />
     </Suspense>
   )
 }
 
-// eslint-disable-next-line react/prop-types
-function DataParse({ matches }) {
-  const champId = Cookies.get('champion')
+function DataParse({ data }) {
+  const champId = parseInt(Cookies.get('champion'))
   const roleId = Cookies.get('role')
+  const puuid = Cookies.get('puuid')
   const parse = new Promise((res) => {
-    const statObj = () => ({
+    const statsObj = (obj = {}) => ({
       games: 0,
       wins: 0,
       losses: 0,
       kills: 0,
       deaths: 0,
       assists: 0,
-      duration: 0,
-      level: 0
+      damage: 0,
+      level: 0,
+      turretKills: 0,
+      creepScore: 0,
+      ...obj
     })
     const parsed = {
-      total: statObj(),
-      byRune: {},
+      total: statsObj(),
+      byPerk: {},
       byMythic: {}
     }
+    const champions = JSON.parse(localStorage.getItem('champions'))
+    const items = JSON.parse(localStorage.getItem('items'))
+    const perks = JSON.parse(localStorage.getItem('perks'))
+    parsed.champion = champions.find(({ id }) => id === champId).label
+    const addObjects = (obj1, obj2) => {
+      const resObj = {}
+      Object.keys(obj1).forEach((key) => {
+        resObj[key] = obj1[key] + obj2[key]
+      })
+    }
+    data
+      .map(({ participants }) => participants.find((p) => p.puuid === puuid))
+      .forEach((p) => {
+        if (!(p.championId === champId && p.teamPosition === roleId)) return
+        const { win, kills, deaths, assists, turretKills } = p
+        const results = {
+          games: 1,
+          wins: +win,
+          losses: +!win,
+          kills,
+          deaths,
+          assists,
+          turretKills,
+          level: p.champLevel,
+          damage: p.totalDamageDealtToChampions,
+          creepScore: p.totalMinionsKilled
+        }
+        parsed.total = addObjects(results, parsed.total)
+        let mythic = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5].find((id) =>
+          items.find((item) => parseInt(item.id) === id && item.mythic)
+        )
+        mythic &&= items.find(({ id }) => parseInt(id) === mythic)?.label
+        mythic ??= 'none'
+        const prevMythicStats = parsed.byMythic[mythic] || statsObj()
+        console.log('mythic', prevMythicStats)
+        parsed.byMythic[mythic] = addObjects(results, prevMythicStats)
+        const perk = perks.find(({ id }) => parseInt(id) === p.perks.styles[0].selections[0].perk)
+        const prevPerkStats = parsed.byPerk[perk] || statsObj()
+        console.log('perk', prevPerkStats)
+        parsed.byPerk[perk] = addObjects(results, prevPerkStats)
+      })
 
     res(parsed)
   })
@@ -84,7 +129,7 @@ function DataParse({ matches }) {
   )
 }
 
-// eslint-disable-next-line react/prop-types
 function DataDisplay({ data }) {
+  console.log(data)
   return <div>Hi</div>
 }
