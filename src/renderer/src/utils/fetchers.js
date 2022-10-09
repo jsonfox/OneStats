@@ -54,10 +54,10 @@ export function getAssetData(type, localStorage) {
       if (type === 'champions') data = data.slice(1)
       const list =
         type === 'items'
-          ? data.map(({ id, name, description }) => ({
-              label: name,
+          ? data.map(({ id, name, description, from }) => ({
+              label: /ornn/i.test(description) ? data.find(({ id }) => id === from[0]).name : name,
               id,
-              mythic: description.includes('mythic')
+              mythic: /mythic/i.test(description)
             }))
           : data.map(({ id, name }) => ({ label: name, id }))
       localStorage.setItem(type, JSON.stringify(list))

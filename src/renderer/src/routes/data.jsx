@@ -46,6 +46,9 @@ export default function Data() {
 }
 
 function DataParse({ data }) {
+  const champions = JSON.parse(localStorage.getItem('champions'))
+  const items = JSON.parse(localStorage.getItem('items'))
+  const perks = JSON.parse(localStorage.getItem('perks'))
   const champId = parseInt(Cookies.get('champion'))
   const roleId = Cookies.get('role')
   const puuid = Cookies.get('puuid')
@@ -64,19 +67,18 @@ function DataParse({ data }) {
       ...obj
     })
     const parsed = {
+      champion: champions.find(({ id }) => id === champId).label,
+      role: roleId === 'UTILITY' ? 'Support' : roleId[0] + roleId.slice(1).toLowerCase(),
       total: statsObj(),
       byPerk: {},
       byMythic: {}
     }
-    const champions = JSON.parse(localStorage.getItem('champions'))
-    const items = JSON.parse(localStorage.getItem('items'))
-    const perks = JSON.parse(localStorage.getItem('perks'))
-    parsed.champion = champions.find(({ id }) => id === champId).label
     const addObjects = (obj1, obj2) => {
       const resObj = {}
       Object.keys(obj1).forEach((key) => {
         resObj[key] = obj1[key] + obj2[key]
       })
+      return resObj
     }
     data
       .map(({ participants }) => participants.find((p) => p.puuid === puuid))
@@ -100,16 +102,51 @@ function DataParse({ data }) {
           items.find((item) => parseInt(item.id) === id && item.mythic)
         )
         mythic &&= items.find(({ id }) => parseInt(id) === mythic)?.label
-        mythic ??= 'none'
+        mythic ??= 'No Mythic'
         const prevMythicStats = parsed.byMythic[mythic] || statsObj()
-        console.log('mythic', prevMythicStats)
         parsed.byMythic[mythic] = addObjects(results, prevMythicStats)
-        const perk = perks.find(({ id }) => parseInt(id) === p.perks.styles[0].selections[0].perk)
+        const perk = perks.find(
+          ({ id }) => parseInt(id) === p.perks.styles[0].selections[0].perk
+        ).label
         const prevPerkStats = parsed.byPerk[perk] || statsObj()
-        console.log('perk', prevPerkStats)
         parsed.byPerk[perk] = addObjects(results, prevPerkStats)
       })
-
+    const avgStats = ({
+      games,
+      wins,
+      losses,
+      kills,
+      deaths,
+      assists,
+      turretKills,
+      level,
+      damage,
+      creepScore
+    }) => {
+      const avg = (stat) => Math.round(stat / games)
+      deaths ||= 1
+      return {
+        games,
+        wins,
+        losses,
+        winrate: Math.round((wins / games) * 100) + '%',
+        kills: avg(kills),
+        deaths: avg(deaths),
+        assists: avg(assists),
+        kda: ((kills + assists) / deaths).toFixed(2),
+        damage: avg(damage),
+        level: avg(level),
+        creepScore: avg(creepScore),
+        turretKills: avg(turretKills)
+      }
+    }
+    parsed.total = avgStats(parsed.total)
+    Object.keys(parsed.byMythic).forEach((key) => {
+      parsed.byMythic[key] = avgStats(parsed.byMythic[key])
+    })
+    Object.keys(parsed.byPerk).forEach((key) => {
+      parsed.byPerk[key] = avgStats(parsed.byPerk[key])
+    })
     res(parsed)
   })
   return (
@@ -130,6 +167,6 @@ function DataParse({ data }) {
 }
 
 function DataDisplay({ data }) {
-  console.log(data)
+  console.log(JSON.stringify(data, null, 2))
   return <div>Hi</div>
 }
