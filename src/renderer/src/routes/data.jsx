@@ -19,6 +19,7 @@ import {
   Typography
 } from '@mui/material'
 import { SectionRows, SectionDivider } from '../components/Table'
+import { Header } from '../components'
 
 const homeBtn = <Link to="/">form</Link>
 
@@ -26,37 +27,40 @@ export default function Data() {
   const { count, data } = useLoaderData()
 
   return (
-    <Suspense
-      fallback={
-        <Stack
-          spacing={2}
-          sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
-        >
-          <p>Fetching {count} games from your match history...</p>
-          <p>
-            This may take a long time (up to 20 minutes) depending on how many matches there are
-            (max 1000)
-            <br />
-            This is because the API key is rate limited to 100 requests per 2 minutes
-          </p>
-          <LinearProgress sx={{ width: '60%' }} />
-        </Stack>
-      }
-    >
-      <Await
-        resolve={data()}
-        errorElement={
-          <Stack className="error" sx={{ textAlign: 'center', alignItems: 'center' }}>
-            <h2>Ran into an error while loading match data</h2>
-            <Button variant="contained" onClick={() => window.location.reload(true)}>
-              Reload
-            </Button>
-            <p>or try resubmitting the {homeBtn}</p>
+    <>
+      <Header />
+      <Suspense
+        fallback={
+          <Stack
+            spacing={2}
+            sx={{ paddingTop: 8, paddingBottom: 16, textAlign: 'center', alignItems: 'center' }}
+          >
+            <p>Fetching {count} games from your match history...</p>
+            <p>
+              This may take a long time (up to 20 minutes) depending on how many matches there are
+              (max 1000)
+              <br />
+              This is because the API key is rate limited to 100 requests per 2 minutes
+            </p>
+            <LinearProgress sx={{ width: '60%' }} />
           </Stack>
         }
-        children={(resolved) => <DataParse data={resolved} />}
-      />
-    </Suspense>
+      >
+        <Await
+          resolve={data()}
+          errorElement={
+            <Stack className="error" sx={{ textAlign: 'center', alignItems: 'center' }}>
+              <h2>Ran into an error while loading match data</h2>
+              <Button variant="contained" onClick={() => window.location.reload(true)}>
+                Reload
+              </Button>
+              <p>or try resubmitting the {homeBtn}</p>
+            </Stack>
+          }
+          children={(resolved) => <DataParse data={resolved} />}
+        />
+      </Suspense>
+    </>
   )
 }
 
@@ -105,7 +109,7 @@ function DataParse({ data }) {
     data
       .map(({ participants }) => participants.find((p) => p.puuid === puuid))
       .forEach((p) => {
-        if (!(p.championId === champId && p.teamPosition === roleId)) return
+        if (!p || !(p.championId === champId && p.teamPosition === roleId)) return
         const { win, kills, deaths, assists, turretKills } = p
         const results = {
           games: 1,

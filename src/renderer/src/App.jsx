@@ -1,13 +1,12 @@
 import Cookies from 'js-cookie'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Typography, Box, Stack, Button } from '@mui/material'
-import HomeIcon from '@mui/icons-material/Home'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
+import { Box, Stack } from '@mui/material'
 import { get as idbGet, set as idbSet } from 'idb-keyval'
 import { getMatchIds, getMatch, getAssetData } from './utils/fetchers'
 import { Form, Data } from './routes'
 import { Versions } from './components'
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     element: <Form />,
     path: '/',
@@ -87,17 +86,7 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <Stack sx={{ height: '100vh' }}>
-      <Box component="header">
-        <Button href="/">
-          <HomeIcon />
-          &nbsp;
-          <Typography marginTop="0.22rem">Home</Typography>
-        </Button>
-        <Typography component="h1" variant="h3" textAlign="center">
-          One Stats
-        </Typography>
-      </Box>
-      <Box component="main" className="container" sx={{ paddingY: 2, flexGrow: 1 }}>
+      <Box component="main" className="container" sx={{ flexGrow: 1 }}>
         <RouterProvider router={router} />
       </Box>
       <Box component="footer">

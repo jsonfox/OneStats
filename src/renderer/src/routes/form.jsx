@@ -12,6 +12,7 @@ import {
   Typography,
   Link
 } from '@mui/material'
+import { Header } from '../components'
 
 const regions = [
   { label: 'NA', id: 'na1' },
@@ -102,87 +103,90 @@ export default function Form() {
   return submitted ? (
     <Navigate to="/data" replace={true} />
   ) : (
-    <Suspense fallback={<FormSkeleton />}>
-      <Await
-        resolve={champions}
-        errorElement={
-          <div className="error">
-            <h2>Could not load asset data</h2>
-            <Button variant="contained" onClick={() => window.location.reload(true)}>
-              Reload
-            </Button>
-          </div>
-        }
-        children={(resChamps) => (
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
-              <Typography textAlign="center">
-                Read about getting a Developer API Key{' '}
-                <Link
-                  href="https://developer.riotgames.com/docs/portal#_getting-started"
-                  target="_blank"
-                >
-                  here
-                </Link>
-              </Typography>
-              <TextField
-                label="Developer API Key"
-                id="key"
-                type="password"
-                defaultValue={defaultValues['key']}
-                onChange={handleInput}
-                error={formError}
-                helperText={formError ? errorText : ''}
-                required
-              />
-              <Stack direction="row" spacing={2}>
+    <>
+      <Header />
+      <Suspense fallback={<FormSkeleton />}>
+        <Await
+          resolve={champions}
+          errorElement={
+            <div className="error">
+              <h2>Could not load asset data</h2>
+              <Button variant="contained" onClick={() => window.location.reload(true)}>
+                Reload
+              </Button>
+            </div>
+          }
+          children={(resChamps) => (
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
+                <Typography textAlign="center">
+                  Read about getting a Developer API Key{' '}
+                  <Link
+                    href="https://developer.riotgames.com/docs/portal#_getting-started"
+                    target="_blank"
+                  >
+                    here
+                  </Link>
+                </Typography>
                 <TextField
-                  label="Summoner Name"
-                  id="summoner"
-                  defaultValue={defaultValues['summoner']}
+                  label="Developer API Key"
+                  id="key"
+                  type="password"
+                  defaultValue={defaultValues['key']}
                   onChange={handleInput}
                   error={formError}
+                  helperText={formError ? errorText : ''}
                   required
                 />
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    label="Summoner Name"
+                    id="summoner"
+                    defaultValue={defaultValues['summoner']}
+                    onChange={handleInput}
+                    error={formError}
+                    required
+                  />
+                  <Autocomplete
+                    id="region"
+                    defaultValue={regions[defaultValues['region']]}
+                    onChange={handleInput}
+                    options={regions}
+                    isOptionEqualToValue={validOption}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Region"
+                        sx={{ minWidth: '175px' }}
+                        error={formError}
+                        required
+                      />
+                    )}
+                  />
+                </Stack>
                 <Autocomplete
-                  id="region"
-                  defaultValue={regions[defaultValues['region']]}
+                  id="champion"
                   onChange={handleInput}
-                  options={regions}
+                  options={resChamps.sort((a, b) => a.label.localeCompare(b.label))}
                   isOptionEqualToValue={validOption}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Region"
-                      sx={{ minWidth: '175px' }}
-                      error={formError}
-                      required
-                    />
-                  )}
+                  renderInput={(params) => <TextField {...params} label="Champion" required />}
                 />
+                <Autocomplete
+                  id="role"
+                  onChange={handleInput}
+                  options={roles}
+                  isOptionEqualToValue={validOption}
+                  renderInput={(params) => <TextField {...params} label="Role" required />}
+                />
+                <Button type="submit" variant="contained">
+                  {formLoading ? <CircularProgress /> : 'Get Your Stats'}
+                </Button>
               </Stack>
-              <Autocomplete
-                id="champion"
-                onChange={handleInput}
-                options={resChamps.sort((a, b) => a.label.localeCompare(b.label))}
-                isOptionEqualToValue={validOption}
-                renderInput={(params) => <TextField {...params} label="Champion" required />}
-              />
-              <Autocomplete
-                id="role"
-                onChange={handleInput}
-                options={roles}
-                isOptionEqualToValue={validOption}
-                renderInput={(params) => <TextField {...params} label="Role" required />}
-              />
-              <Button type="submit" variant="contained">
-                {formLoading ? <CircularProgress /> : 'Get Your Stats'}
-              </Button>
-            </Stack>
-          </form>
-        )}
-      />
-    </Suspense>
+            </form>
+          )}
+        />
+      </Suspense>
+    </>
   )
 }
 

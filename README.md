@@ -13,8 +13,8 @@ React-based Electron.js application scaffolded with Vite designed to fetch and p
 
 ## Download
 
-
 ## Mock-up
+
 ![Landing page form for app use](/assets/OneStats-form.png)
 ![Progress page while fetching match data](/assets/OneStats-loading.png)
 ![Results page with parsed data](/assets/OneStats-results.png)
