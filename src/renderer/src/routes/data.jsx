@@ -89,7 +89,8 @@ function DataParse({ data }) {
       JUNGLE: 'Jungle',
       MIDDLE: 'Mid',
       BOTTOM: 'ADC',
-      UTILITY: 'Support'
+      UTILITY: 'Support',
+      ALL: 'All Roles'
     }
     const parsed = {
       champion: champions.find(({ id }) => id === champId).label,
@@ -108,7 +109,7 @@ function DataParse({ data }) {
     data
       .map(({ participants }) => participants.find((p) => p.puuid === puuid))
       .forEach((p) => {
-        if (!p || !(p.championId === champId && p.teamPosition === roleId)) return
+        if (!p || !(p.championId === champId && (roleId === 'ALL' || p.teamPosition === roleId))) return
         const { win, kills, deaths, assists, turretKills } = p
         const results = {
           games: 1,

@@ -26,13 +26,12 @@ const regions = [
   { label: 'RU', id: 'ru' },
   { label: 'TR', id: 'tr1' }
 ]
-const roles = ['Top', 'Jungle', 'Middle', 'Bottom', 'Support'].map((r) => ({
+const roles = ['Top', 'Jungle', 'Middle', 'Bottom', 'Support', 'All'].map((r) => ({
   label: r,
   id: r === 'Support' ? 'UTILITY' : r.toUpperCase()
 }))
 
 export default function Form() {
-  // TODO: Add link to instructions for obtaining an API key
   const { champions } = useLoaderData()
 
   const [formInput, setFormInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
@@ -112,15 +111,20 @@ export default function Form() {
           children={(resChamps) => (
             <form onSubmit={handleSubmit}>
               <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
-                <Typography textAlign="center">
-                  Read about getting a Developer API Key{' '}
-                  <Link
-                    href="https://developer.riotgames.com/docs/portal#_getting-started"
-                    target="_blank"
-                  >
-                    here
-                  </Link>
-                </Typography>
+                <Stack>
+                  <Typography textAlign="center">
+                    Read about getting a Developer API Key{' '}
+                    <Link
+                      href="https://developer.riotgames.com/docs/portal#_getting-started"
+                      target="_blank"
+                    >
+                      here
+                    </Link>
+                  </Typography>
+                  <Typography>
+                    Developer keys expire after 24 hours then need to be manually regenerated
+                  </Typography>
+                </Stack>
                 <TextField
                   label="Developer API Key"
                   id="key"
