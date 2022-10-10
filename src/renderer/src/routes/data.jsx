@@ -96,6 +96,7 @@ function DataParse({ data }) {
       champion: champions.find(({ id }) => id === champId).label,
       role: roles[roleId],
       total: statsObj(),
+      byRole: {},
       byPerk: {},
       byMythic: {}
     }
@@ -109,7 +110,8 @@ function DataParse({ data }) {
     data
       .map(({ participants }) => participants.find((p) => p.puuid === puuid))
       .forEach((p) => {
-        if (!p || !(p.championId === champId && (roleId === 'ALL' || p.teamPosition === roleId))) return
+        if (!p || !(p.championId === champId && (roleId === 'ALL' || p.teamPosition === roleId)))
+          return
         const { win, kills, deaths, assists, turretKills } = p
         const results = {
           games: 1,
@@ -124,6 +126,11 @@ function DataParse({ data }) {
           creepScore: p.totalMinionsKilled
         }
         parsed.total = addObjects(results, parsed.total)
+        if (roleId === 'ALL') {
+          let role = roles[p.teamPosition]
+          const prevRoleStats = parsed.byRole[role] || statsObj()
+          parsed.byRole[role] = addObjects(results, prevRoleStats)
+        }
         let mythic = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5].find((id) =>
           items.find((item) => parseInt(item.id) === id && item.mythic)
         )
@@ -167,6 +174,10 @@ function DataParse({ data }) {
       }
     }
     parsed.total = avgStats(parsed.total)
+    if (roleId === 'ALL')
+      Object.keys(parsed.byRole).forEach((key) => {
+        parsed.byRole[key] = avgStats(parsed.byRole[key])
+      })
     Object.keys(parsed.byMythic).forEach((key) => {
       parsed.byMythic[key] = avgStats(parsed.byMythic[key])
     })
@@ -211,6 +222,7 @@ function DataDisplay({ data }) {
   ]
   const rows = {
     all: [{ specifier: 'All Games', ...data.total }],
+    byRole: createRows(data.byRole),
     byMythic: createRows(data.byMythic),
     byPerk: createRows(data.byPerk)
   }
@@ -250,6 +262,12 @@ function DataDisplay({ data }) {
             </TableHead>
             <TableBody>
               <SectionRows rows={rows.all} />
+              {Object.keys(rows.byRole).length > 0 && (
+                <>
+                  <SectionDivider label="By Role" columns={columns} />
+                  <SectionRows rows={rows.byRole} />
+                </>
+              )}
               <SectionDivider label="By Mythic" columns={columns} />
               <SectionRows rows={rows.byMythic} />
               <SectionDivider label="By Rune" columns={columns} />

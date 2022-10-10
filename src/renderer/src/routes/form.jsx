@@ -26,7 +26,7 @@ const regions = [
   { label: 'RU', id: 'ru' },
   { label: 'TR', id: 'tr1' }
 ]
-const roles = ['Top', 'Jungle', 'Middle', 'Bottom', 'Support', 'All'].map((r) => ({
+const roles = ['All', 'Top', 'Jungle', 'Middle', 'Bottom', 'Support'].map((r) => ({
   label: r,
   id: r === 'Support' ? 'UTILITY' : r.toUpperCase()
 }))
@@ -111,8 +111,8 @@ export default function Form() {
           children={(resChamps) => (
             <form onSubmit={handleSubmit}>
               <Stack spacing={3} sx={{ maxWidth: '400px', margin: 'auto' }}>
-                <Stack>
-                  <Typography textAlign="center">
+                <Stack textAlign="center">
+                  <Typography>
                     Read about getting a Developer API Key{' '}
                     <Link
                       href="https://developer.riotgames.com/docs/portal#_getting-started"
