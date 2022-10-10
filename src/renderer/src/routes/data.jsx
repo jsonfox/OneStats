@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-children-prop */
-import Cookies from 'js-cookie'
 import { saveAs } from 'file-saver'
 import { Suspense } from 'react'
 import { useLoaderData, Await, Link } from 'react-router-dom'
@@ -68,9 +67,9 @@ function DataParse({ data }) {
   const champions = JSON.parse(localStorage.getItem('champions'))
   const items = JSON.parse(localStorage.getItem('items'))
   const perks = JSON.parse(localStorage.getItem('perks'))
-  const champId = parseInt(Cookies.get('champion'))
-  const roleId = Cookies.get('role')
-  const puuid = Cookies.get('puuid')
+  const champId = parseInt(sessionStorage.getItem('champion'))
+  const roleId = sessionStorage.getItem('role')
+  const puuid = sessionStorage.getItem('puuid')
   const parse = new Promise((res) => {
     const statsObj = (obj = {}) => ({
       games: 0,

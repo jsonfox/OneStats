@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { Box, Stack } from '@mui/material'
 import { get as idbGet, set as idbSet } from 'idb-keyval'
@@ -22,18 +21,18 @@ const router = createHashRouter([
     element: <Data />,
     path: 'data',
     loader: async () => {
-      const puuid = Cookies.get('puuid')
+      const puuid = sessionStorage.getItem('puuid')
       let userData = await idbGet(puuid)
       userData &&= JSON.parse(userData)
       userData ??= {
         matches: [],
         latest: null
       }
-      const [key, region] = [Cookies.get('key'), Cookies.get('region')]
+      const [key, region] = [sessionStorage.getItem('key'), sessionStorage.getItem('region')]
       const matchIds = await getMatchIds({
         key,
         region,
-        puuid: Cookies.get('puuid'),
+        puuid: sessionStorage.getItem('puuid'),
         latest: userData.latest
       })
 

@@ -1,5 +1,4 @@
 /* eslint-disable react/no-children-prop */
-import Cookies from 'js-cookie'
 import { useState, useReducer, Suspense } from 'react'
 import { Navigate, useLoaderData, Await } from 'react-router-dom'
 import {
@@ -37,9 +36,9 @@ export default function Form() {
   const { champions } = useLoaderData()
 
   const [formInput, setFormInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
-    key: Cookies.get('key'),
-    summoner: Cookies.get('summoner'),
-    region: Cookies.get('region'),
+    key: sessionStorage.getItem('key'),
+    summoner: sessionStorage.getItem('summoner'),
+    region: sessionStorage.getItem('region'),
     champion: '',
     role: ''
   })
@@ -49,9 +48,9 @@ export default function Form() {
   const [submitted, setSubmitted] = useState(false)
 
   const defaultValues = {
-    key: Cookies.get('key') || '',
-    summoner: Cookies.get('summoner') || '',
-    region: regions.findIndex(({ id }) => id === Cookies.get('region'))
+    key: sessionStorage.getItem('key') || '',
+    summoner: sessionStorage.getItem('summoner') || '',
+    region: regions.findIndex(({ id }) => id === sessionStorage.getItem('region'))
   }
 
   const errorText = 'Request failed, make sure your API key and summoner details are correct'
@@ -85,16 +84,10 @@ export default function Form() {
     const puuid = await validateCredentials()
     setFormLoading(false)
     if (!puuid) return
-    const cookieOptions = { sameSite: 'lax', secure: true }
     Object.keys(formInput).forEach((k) => {
-      if (k === 'key') {
-        if (Cookies.get('key') !== formInput.key)
-          Cookies.set('key', formInput.key, { expires: 0.8, ...cookieOptions })
-      } else {
-        Cookies.set(k.toLowerCase(), formInput[k], cookieOptions)
-      }
+      sessionStorage.setItem(k.toLowerCase(), formInput[k])
     })
-    Cookies.set('puuid', puuid)
+    sessionStorage.setItem('puuid', puuid)
     setSubmitted(true)
   }
 
